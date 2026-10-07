@@ -24,16 +24,12 @@ def record_session():
     )
     session_id = cur.lastrowid
     if tipo=="palestra":
-        exercise_id = record_exercises(session_id)
+        exercise_id = find_exercise(session_id)
         reps, weight = input("Inserisci ripetizioni e peso separati da uno spazio: ").split()
         record_set(session_id, exercise_id, int(reps), float(weight))
 
 
     print("Sessione salvata!")
-
-def record_exercises(session_id):
-    exercise_id = find_exercise()
-    return exercise_id
 
 def find_exercise():
     es=input("Esercizio: ").strip().lower()
@@ -46,6 +42,7 @@ def find_exercise():
         scelta = int(input("Scegli un numero: "))
         exercise_id = results[scelta - 1][0]
     else:
+        
         cur.execute("INSERT INTO exercises (name) VALUES (?)", (es,))
         exercise_id = cur.lastrowid
     conn.commit()
