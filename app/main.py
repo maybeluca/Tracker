@@ -24,12 +24,16 @@ def record_session():
     )
     session_id = cur.lastrowid
     if tipo=="palestra":
-            record_exercises(session_id)
+        exercise_id = record_exercises(session_id)
+        reps, weight = input("Inserisci ripetizioni e peso separati da uno spazio: ").split()
+        record_set(session_id, exercise_id, int(reps), float(weight))
+
+
     print("Sessione salvata!")
 
 def record_exercises(session_id):
     exercise_id = find_exercise()
-    
+    return exercise_id
 
 def find_exercise():
     es=input("Esercizio: ").strip().lower()
@@ -46,6 +50,20 @@ def find_exercise():
         exercise_id = cur.lastrowid
     conn.commit()
     return exercise_id
+
+def record_set(session_id, exercise_id, reps, weight):
+    cur.execute(
+        "SELECT COUNT(*) from sets where session_id = ? AND exercise_id = ?"
+        ,
+        (session_id, exercise_id)
+    )
+    conteggio=cur.fetchone()[0]
+    cur.execute(
+        "INSERT INTO sets (session_id, exercise_id, set_number, reps, weight_kg ) VALUES (?, ?, ?, ?, ?)",
+        (session_id, exercise_id, conteggio + 1, reps, weight )
+    )
+    conn.commit()
+
 
 if __name__ == "__main__":
     record_session()
