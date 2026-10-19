@@ -36,8 +36,20 @@ def record_session():
                 exercise_id = find_exercise(session_id)
                 if exercise_id is False:
                     break
-                reps, weight = input("Inserisci ripetizioni e peso separati da uno spazio: ").split()
-                record_set(session_id, exercise_id, int(reps), float(weight))
+                while True:
+                    try:
+                        reps, weight = input("Inserisci ripetizioni e peso separati da uno spazio: ").split()
+                        reps=int(reps)
+                        weight=weight.replace(",", ".")
+                        weight=float(weight)
+                    except ValueError:
+                        print("Inserisci due valori separati da uno spazio.")
+                        continue
+                    if reps <= 0 or weight < 0:
+                        print("inserire almeno 1 ripetizione e un peso non negativo.")
+                        continue
+                    break
+                record_set(session_id, exercise_id, reps, weight)
         finally:
             minuti=round((datetime.now()-inizio).total_seconds()/60)
             save_duration(session_id, minuti)
