@@ -11,9 +11,17 @@ def record_session():
     print("Tipo di sessione:")
     for i, tipo in enumerate(TIPI_SESSIONE, start=1):
         print(f"{i}) {tipo}")
-
-    scelta = int(input("Scegli un numero: "))
-    tipo = TIPI_SESSIONE[scelta - 1]
+    while True:
+        try:
+            scelta = int(input("Scegli un numero: "))
+        except ValueError:
+            print("Inserisci un numero valido.")
+            continue
+        if 1 <= scelta <= len(TIPI_SESSIONE):
+            tipo = TIPI_SESSIONE[scelta - 1]
+            break
+        else:
+            print(f"Scegli un numero da 1 a {len(TIPI_SESSIONE)}")
     oggi = date.today().isoformat()
 
     cur.execute(
