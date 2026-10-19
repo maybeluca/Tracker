@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import date
+from datetime import date, datetime
 
 TIPI_SESSIONE = ["palestra", "corsa", "camminata", "altro"]
 
@@ -14,23 +14,32 @@ def record_session():
 
     scelta = int(input("Scegli un numero: "))
     tipo = TIPI_SESSIONE[scelta - 1]
-
-    durata = int(input("Durata in minuti: "))
     oggi = date.today().isoformat()
 
     cur.execute(
         "INSERT INTO sessions (date, type, duration_min) VALUES (?, ?, ?)",
-        (oggi, tipo, durata),
+        (oggi, tipo, None),
     )
     session_id = cur.lastrowid
     if tipo=="palestra":
-        while True:
-            exercise_id = find_exercise(session_id)
-            if exercise_id is False:
-                break
-            reps, weight = input("Inserisci ripetizioni e peso separati da uno spazio: ").split()
-            record_set(session_id, exercise_id, int(reps), float(weight))
+        inizio = datetime.now()
+        try:
+            while True:
+                exercise_id = find_exercise(session_id)
+                if exercise_id is False:
+                    break
+                reps, weight = input("Inserisci ripetizioni e peso separati da uno spazio: ").split()
+                record_set(session_id, exercise_id, int(reps), float(weight))
+        finally:
+            minuti=round((datetime.now()-inizio).total_seconds()/60)
+            save_duration(session_id, minuti)
+    else:
+        save_duration(session_id, int(input("Durata in minuti: ")))
     print("Sessione salvata!")
+
+def save_duration(session_id, minuti):
+    cur.execute("UPDATE sessions SET duration_min = ? WHERE id = ?", (minuti, session_id))
+    conn.commit()
 
 def find_exercise(session_id):
     print("0) Prosegui\n1) Ripeti esercizio\n2) Termina allenamento\n")
