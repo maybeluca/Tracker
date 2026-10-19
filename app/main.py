@@ -54,7 +54,17 @@ def record_session():
             minuti=round((datetime.now()-inizio).total_seconds()/60)
             save_duration(session_id, minuti)
     else:
-        save_duration(session_id, int(input("Durata in minuti: ")))
+        while True:
+            try:
+                minuti = int(input("Durata in minuti: "))
+            except ValueError:
+                print("Inserisci un numero valido.")
+                continue
+            if minuti <= 0:
+                print("Inserisci un numero positivo.")
+                continue
+            break
+        save_duration(session_id, minuti)
     print("Sessione salvata!")
 
 def save_duration(session_id, minuti):
