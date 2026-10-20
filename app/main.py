@@ -6,17 +6,45 @@ TIPI_SESSIONE = ["palestra", "corsa", "camminata", "altro"]
 conn = sqlite3.connect("tracker.db")
 cur = conn.cursor()
 
+def ask_int_float(prompt, min1, min2, max1=None, max2=None):
+    while True:
+        try:
+            intVar, floatVar = input(prompt).split()
+            intVar=int(intVar)
+            floatVar=floatVar.replace(",", ".")
+            floatVar=float(floatVar)
+        except ValueError:
+            print("Inserisci due valori separati da uno spazio.")
+            continue
+        if intVar < min1 or floatVar < min2 or (max1 is not None and intVar>max1 or max2 is not None and floatVar>max2):
+            if max1 is not None or max2 is not None:
+                print(f"inserire un intero compreso tra {min1} e {max1} e un decimale compreso tra {min2} e {max2}.")
+            else:    
+                print(f"inserire un intero maggiore o uguale a {min1} e un decimale maggiore di {min2}.")
+            continue
+        return intVar, floatVar
+    
+def ask_int(prompt, minimo, massimo=None):
+    while True:
+        try:
+            scelta = int(input(prompt))
+        except ValueError:
+            print("Inserisci un numero valido.")
+            continue
+        if scelta < minimo or (massimo is not None and scelta > massimo):
+            if massimo is not None:
+                print(f"Scegli un numero da {minimo} a {massimo}")
+            else:
+                print(f"Scegli un numero maggiore o uguale a {minimo}")
+            continue
+        return scelta
 
 def record_session():
     print("Tipo di sessione:")
     for i, tipo in enumerate(TIPI_SESSIONE, start=1):
         print(f"{i}) {tipo}")
     while True:
-        try:
-            scelta = int(input("Scegli un numero: "))
-        except ValueError:
-            print("Inserisci un numero valido.")
-            continue
+        scelta = ask_int("Scegli un numero: ", 1, len(TIPI_SESSIONE))
         if 1 <= scelta <= len(TIPI_SESSIONE):
             tipo = TIPI_SESSIONE[scelta - 1]
             break
@@ -36,34 +64,13 @@ def record_session():
                 exercise_id = find_exercise(session_id)
                 if exercise_id is False:
                     break
-                while True:
-                    try:
-                        reps, weight = input("Inserisci ripetizioni e peso separati da uno spazio: ").split()
-                        reps=int(reps)
-                        weight=weight.replace(",", ".")
-                        weight=float(weight)
-                    except ValueError:
-                        print("Inserisci due valori separati da uno spazio.")
-                        continue
-                    if reps <= 0 or weight < 0:
-                        print("inserire almeno 1 ripetizione e un peso non negativo.")
-                        continue
-                    break
+                reps, weight=ask_int_float("Inserisci il numero di ripetizioni e il peso (r p)", 1, 0)
                 record_set(session_id, exercise_id, reps, weight)
         finally:
             minuti=round((datetime.now()-inizio).total_seconds()/60)
             save_duration(session_id, minuti)
     else:
-        while True:
-            try:
-                minuti = int(input("Durata in minuti: "))
-            except ValueError:
-                print("Inserisci un numero valido.")
-                continue
-            if minuti <= 0:
-                print("Inserisci un numero positivo.")
-                continue
-            break
+        minuti=ask_int("Inserisci la durata in minuti", 1)
         save_duration(session_id, minuti)
     print("Sessione salvata!")
 
