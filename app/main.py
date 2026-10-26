@@ -43,13 +43,8 @@ def record_session():
     print("Tipo di sessione:")
     for i, tipo in enumerate(TIPI_SESSIONE, start=1):
         print(f"{i}) {tipo}")
-    while True:
-        scelta = ask_int("Scegli un numero: ", 1, len(TIPI_SESSIONE))
-        if 1 <= scelta <= len(TIPI_SESSIONE):
-            tipo = TIPI_SESSIONE[scelta - 1]
-            break
-        else:
-            print(f"Scegli un numero da 1 a {len(TIPI_SESSIONE)}")
+    scelta = ask_int("Scegli un numero: ", 1, len(TIPI_SESSIONE))
+    tipo = TIPI_SESSIONE[scelta - 1]
     oggi = date.today().isoformat()
 
     cur.execute(
@@ -64,13 +59,13 @@ def record_session():
                 exercise_id = find_exercise(session_id)
                 if exercise_id is False:
                     break
-                reps, weight=ask_int_float("Inserisci il numero di ripetizioni e il peso (r p)", 1, 0)
+                reps, weight=ask_int_float("Inserisci il numero di ripetizioni e il peso (r p): ", 1, 0)
                 record_set(session_id, exercise_id, reps, weight)
         finally:
             minuti=round((datetime.now()-inizio).total_seconds()/60)
             save_duration(session_id, minuti)
     else:
-        minuti=ask_int("Inserisci la durata in minuti", 1)
+        minuti=ask_int("Inserisci la durata in minuti: ", 1)
         save_duration(session_id, minuti)
     print("Sessione salvata!")
 
@@ -80,17 +75,17 @@ def save_duration(session_id, minuti):
 
 def find_exercise(session_id):
     print("0) Prosegui\n1) Ripeti esercizio\n2) Termina allenamento\n")
-    c=int(input("Scelta: "))
+    c=ask_int("Scelta: ", 0, 2,)
     if c==0:
         es=input("Esercizio: ").strip().lower()
         cur.execute("SELECT id, name FROM exercises WHERE name LIKE ?", (f"%{es}%",))
         results = cur.fetchall()
-        print("0) Crea Esercizio")
         if results:
             print("Esercizi trovati:")
             for i, (ex_id, name) in enumerate(results, start=1):
                 print(f"{i}) {name} (ID: {ex_id})")
-            scelta = int(input("Scegli un numero: "))
+            print("0) Crea Esercizio")
+            scelta = ask_int("Scegli l'esercizio: ", 0, len(results))
             if scelta==0:
                 print(f"Creare l'esercizio {es} ? s/n ")
                 if input().strip().lower() == "s":
@@ -98,9 +93,6 @@ def find_exercise(session_id):
                     exercise_id = cur.lastrowid
                 else:
                     return find_exercise(session_id)
-            elif (scelta < 0 or scelta > len(results)):
-                print("Scelta non valida.\n")
-                return find_exercise(session_id)
             else:
                 exercise_id = results[scelta - 1][0]
         else:
@@ -118,13 +110,9 @@ def find_exercise(session_id):
         else:
             print("Nessun esercizio precedente trovato.\n")
             return find_exercise(session_id)
-    elif c==2:
+    else: 
         print("Allenamento terminato.")
         return False
-    else:
-        print("Scelta non valida.\n")
-        return find_exercise(session_id)
-
     conn.commit()
     return exercise_id
 
