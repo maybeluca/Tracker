@@ -39,7 +39,7 @@ def ask_int(prompt, minimo, massimo=None):
             continue
         return scelta
 
-def record_session():
+"""def record_session():
     print("Tipo di sessione:")
     for i, tipo in enumerate(TIPI_SESSIONE, start=1):
         print(f"{i}) {tipo}")
@@ -67,11 +67,28 @@ def record_session():
     else:
         minuti=ask_int("Inserisci la durata in minuti: ", 1)
         save_duration(session_id, minuti)
-    print("Sessione salvata!")
+    print("Sessione salvata!")"""
 
 def save_duration(session_id, minuti):
     cur.execute("UPDATE sessions SET duration_min = ? WHERE id = ?", (minuti, session_id))
     conn.commit()
+
+def search_exercises(query):
+    cur.execute("SELECT id, name FROM exercises WHERE name LIKE ?", (f"%{query}%",))
+    results = cur.fetchall()
+    return results;
+
+def create_exercise(query):
+    cur.execute("INSERT INTO exercises (name) VALUES (?)", (f"%{query}%",))
+    return True
+
+def last_exercise_id():
+    return cur.lastrowid
+
+# -----TEST------
+print(f"esercizi trovati:\n{search_exercises("panca")}")
+create_exercise("esercizio prova")
+print(f"Id ultimo esercizio: {last_exercise_id}")
 
 def find_exercise(session_id):
     print("0) Prosegui\n1) Ripeti esercizio\n2)Ripeti esercizio con dati diversi\n3) Termina allenamento\n")
