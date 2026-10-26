@@ -74,8 +74,8 @@ def save_duration(session_id, minuti):
     conn.commit()
 
 def find_exercise(session_id):
-    print("0) Prosegui\n1) Ripeti esercizio\n2) Termina allenamento\n")
-    c=ask_int("Scelta: ", 0, 2,)
+    print("0) Prosegui\n1) Ripeti esercizio\n2)Ripeti esercizio con dati diversi\n3) Termina allenamento\n")
+    c=ask_int("Scelta: ", 0, 3,)
     if c==0:
         es=input("Esercizio: ").strip().lower()
         cur.execute("SELECT id, name FROM exercises WHERE name LIKE ?", (f"%{es}%",))
